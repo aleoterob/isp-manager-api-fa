@@ -35,7 +35,7 @@ Create a **`.env`** file at the repo root. The app loads it at startup and valid
 ### `.env` Variables
 
 ```env
-DATABASE_URL="Ask aleoterob@gmail for the URL (because of GitHub secret policies for public repositories)."
+DATABASE_URL="Ask aleoterob@gmail for the URL (due to GitHub's secret policies for public repositories)."
 
 # JWT
 JWT_ACCESS_SECRET="replace-with-a-random-secret-of-at-least-32-characters"
