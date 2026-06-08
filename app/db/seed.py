@@ -3,10 +3,10 @@ from datetime import timedelta
 from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
+from app.core.datetime import utc_now
 from app.core.security import hash_password
 from app.db.session import SessionLocal, engine
 from app.features.auth.models import RefreshSession
-from app.features.auth.service import utc_now
 from app.features.customers.models import Customer
 from app.features.inventory.models import (
     Equipment,

@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+from app.core.datetime import to_utc_iso_z
 from app.features.orders.models import OrderStatus, OrderType
 
 
@@ -41,6 +42,10 @@ class OrderRead(BaseModel):
     createdAt: datetime
     updatedAt: datetime
 
+    @field_serializer("scheduledAt", "createdAt", "updatedAt")
+    def serialize_datetime_as_utc_z(self, value: datetime | None) -> str | None:
+        return to_utc_iso_z(value)
+
 
 class OrderCreate(BaseModel):
     title: str = Field(min_length=2, max_length=200)
@@ -63,4 +68,3 @@ class OrderUpdate(BaseModel):
 
 class DeletedOrderId(BaseModel):
     id: str
-

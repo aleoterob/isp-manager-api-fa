@@ -5,6 +5,7 @@ from enum import StrEnum
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.datetime import utc_now
 from app.db.base import Base
 
 
@@ -23,10 +24,10 @@ class EquipmentCategory(Base):
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     createdAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, default=utc_now, server_default=func.now(), nullable=False
     )
     updatedAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     equipment = relationship("Equipment", back_populates="category")
@@ -42,10 +43,10 @@ class Unit(Base):
     abbreviation: Mapped[str | None] = mapped_column(String, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     createdAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, default=utc_now, server_default=func.now(), nullable=False
     )
     updatedAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     equipment = relationship("Equipment", back_populates="unit")
@@ -63,10 +64,10 @@ class Equipment(Base):
     )
     unitId: Mapped[str] = mapped_column(String, ForeignKey("units.id"), nullable=False)
     createdAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, default=utc_now, server_default=func.now(), nullable=False
     )
     updatedAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     category = relationship("EquipmentCategory", back_populates="equipment")
@@ -88,10 +89,10 @@ class Warehouse(Base):
     province: Mapped[str | None] = mapped_column(String, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     createdAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, default=utc_now, server_default=func.now(), nullable=False
     )
     updatedAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     stock = relationship("WarehouseStock", back_populates="warehouse")
@@ -140,4 +141,3 @@ class StockMovement(Base):
     equipment = relationship("Equipment", back_populates="movements")
     warehouse = relationship("Warehouse", back_populates="movements")
     user = relationship("User", back_populates="stockMovements")
-

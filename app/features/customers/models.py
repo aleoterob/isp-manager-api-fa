@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, Float, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.datetime import utc_now
 from app.db.base import Base
 
 
@@ -23,11 +24,10 @@ class Customer(Base):
     lat: Mapped[float | None] = mapped_column(Float, nullable=True)
     lng: Mapped[float | None] = mapped_column(Float, nullable=True)
     createdAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, default=utc_now, server_default=func.now(), nullable=False
     )
     updatedAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     orders = relationship("Order", back_populates="customer")
-

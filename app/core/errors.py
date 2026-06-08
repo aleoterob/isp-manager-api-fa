@@ -70,6 +70,21 @@ class AppException(Exception):
         super().__init__(definition.message)
 
 
+def _is_unique_integrity_error(exc: IntegrityError) -> bool:
+    orig = getattr(exc, "orig", None)
+    sqlstate = getattr(orig, "sqlstate", None)
+    if sqlstate == "23505":
+        return True
+
+    constraint_name = getattr(getattr(orig, "diag", None), "constraint_name", "")
+    if constraint_name and (
+        constraint_name.endswith("_key") or "unique" in constraint_name.lower()
+    ):
+        return True
+
+    return "unique" in str(orig).lower()
+
+
 def _timestamp() -> str:
     return (
         datetime.now(UTC).replace(tzinfo=None).isoformat(timespec="milliseconds") + "Z"
@@ -166,8 +181,11 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(IntegrityError)
     async def integrity_handler(request: Request, exc: IntegrityError) -> JSONResponse:
-        _ = exc
-        definition = ErrorCode.DB_UNIQUE_VIOLATION
+        definition = (
+            ErrorCode.DB_UNIQUE_VIOLATION
+            if _is_unique_integrity_error(exc)
+            else ErrorCode.INTERNAL_ERROR
+        )
         return JSONResponse(
             status_code=definition.status,
             content=error_body(

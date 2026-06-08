@@ -1,10 +1,11 @@
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi import Request, Response
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.core.datetime import utc_now
 from app.core.errors import AppException, ErrorCode
 from app.core.security import (
     create_access_token,
@@ -20,10 +21,6 @@ from app.features.users.models import Role, User
 from app.features.users.repository import UserRepository
 from app.features.users.schemas import UserCreate
 from app.features.users.service import UserService
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class AuthService:

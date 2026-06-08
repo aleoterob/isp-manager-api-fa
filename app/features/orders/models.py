@@ -5,6 +5,7 @@ from enum import StrEnum
 from sqlalchemy import DateTime, Enum, Float, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.datetime import utc_now
 from app.db.base import Base
 
 
@@ -53,10 +54,10 @@ class Order(Base):
         String, ForeignKey("customers.id", ondelete="SET NULL"), nullable=True
     )
     createdAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+        DateTime, default=utc_now, server_default=func.now(), nullable=False
     )
     updatedAt: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     installer = relationship("User", back_populates="orders")

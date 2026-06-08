@@ -92,6 +92,7 @@ def test_post_orders_as_admin_creates_order(
             "type": "REPAIR",
             "description": "E2E description",
             "customerId": customer.id,
+            "scheduledAt": "2026-05-04T16:00:00.000Z",
         },
     )
 
@@ -101,6 +102,51 @@ def test_post_orders_as_admin_creates_order(
     assert body["data"]["title"] == "Created order"
     assert body["data"]["type"] == "REPAIR"
     assert body["data"]["customerId"] == customer.id
+    assert body["data"]["scheduledAt"] == "2026-05-04T16:00:00.000Z"
+
+
+def test_post_orders_allows_duplicate_titles(
+    client: TestClient, db_session: Session
+) -> None:
+    user_id, token = signup(client, "admin-duplicate-orders@example.com")
+    user = db_session.get(User, user_id)
+    assert user is not None
+    user.role = Role.ADMIN
+    db_session.commit()
+
+    client.post("/auth/logout", headers={"x-csrf-token": token})
+    token = csrf(client)
+    client.post(
+        "/auth/login",
+        headers={"x-csrf-token": token},
+        json={"email": "admin-duplicate-orders@example.com", "password": "Password123"},
+    )
+
+    customer = Customer(
+        name="Duplicate Title Customer",
+        address="Av. Corrientes 123",
+        city="CABA",
+        province="CABA",
+        zipCode="1043",
+        lat=-34.6037,
+        lng=-58.3816,
+    )
+    db_session.add(customer)
+    db_session.commit()
+    db_session.refresh(customer)
+
+    payload = {
+        "title": "Same visible order title",
+        "type": "REPAIR",
+        "customerId": customer.id,
+    }
+    first = client.post("/orders", headers={"x-csrf-token": token}, json=payload)
+    second = client.post("/orders", headers={"x-csrf-token": token}, json=payload)
+
+    assert first.status_code == 201
+    assert second.status_code == 201
+    assert first.json()["data"]["title"] == second.json()["data"]["title"]
+    assert first.json()["data"]["id"] != second.json()["data"]["id"]
 
 
 def test_get_order_returns_404_when_missing(client: TestClient) -> None:
@@ -109,4 +155,3 @@ def test_get_order_returns_404_when_missing(client: TestClient) -> None:
 
     assert response.status_code == 404
     assert response.json()["code"] == "ORD_NOT_FOUND"
-

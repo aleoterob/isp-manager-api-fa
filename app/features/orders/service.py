@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.core.datetime import to_utc_naive
 from app.core.errors import AppException, ErrorCode
 from app.features.customers.repository import CustomerRepository
 from app.features.orders.models import Order, OrderStatus
@@ -56,7 +57,7 @@ class OrderService:
             zipCode=customer.zipCode,
             lat=customer.lat,
             lng=customer.lng,
-            scheduledAt=dto.scheduledAt,
+            scheduledAt=to_utc_naive(dto.scheduledAt),
         )
         self.db.add(order)
         self.db.commit()
@@ -84,9 +85,11 @@ class OrderService:
                 self._ensure_installer(installer_id)
                 order.installerId = installer_id
 
-        for field in ["title", "description", "type", "status", "scheduledAt"]:
+        for field in ["title", "description", "type", "status"]:
             if field in patch:
                 setattr(order, field, patch[field])
+        if "scheduledAt" in patch:
+            order.scheduledAt = to_utc_naive(patch["scheduledAt"])
 
         self.db.commit()
         return self.find_one(order.id)
@@ -97,4 +100,3 @@ class OrderService:
         self.db.delete(order)
         self.db.commit()
         return {"id": order_id}
-
