@@ -27,6 +27,7 @@ isp-manager-seed = "app.db.seed:main_cli"
 dev = [
   "httpx>=0.27.2",
   "pytest>=8.3.4",
+  "pytest-cov>=6.0.0",
   "ruff>=0.8.2",
 ]
 
