@@ -34,10 +34,8 @@ Create a **`.env`** file at the repo root. The app loads it at startup and valid
 
 ### `.env` Variables
 
-Values aligned with the Nest API defaults:
-
 ```env
-DATABASE_URL="postgresql+psycopg://user:password@host/database?sslmode=require"
+DATABASE_URL="Ask aleoterob@gmail for the URL (because of GitHub secret policies for public repositories)."
 
 # JWT
 JWT_ACCESS_SECRET="replace-with-a-random-secret-of-at-least-32-characters"
@@ -102,11 +100,11 @@ python -m alembic upgrade head
 
 This FastAPI service can be deployed to Cloud Run with the same runtime environment contract as the Nest API.
 
-| Resource              | Notes                                                                                                                                                                                                                                                                                                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **API service**       | Build from the **Dockerfile** in this repo. The image installs the Python package and starts **Uvicorn** with `main:app`.                                                                                                                                                                                                                                                       |
+| Resource              | Notes                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **API service**       | Build from the **Dockerfile** in this repo. The image installs the Python package and starts **Uvicorn** with `main:app`.                                                                                                                                                                                                                                  |
 | **Runtime variables** | `DATABASE_URL`, `JWT_ACCESS_SECRET` (>=32 chars), `FRONTEND_ORIGINS` (CSV of SPA origins for CORS/credentials), `NODE_ENV`, `COOKIE_*`, `JWT_*`, `CSRF_*`, `SENTRY_*`. Behind a proxy: **`TRUST_PROXY=true`**. SPA on another hostname: typically **`COOKIE_SAMESITE=none`** + **`COOKIE_SECURE=true`**; cookies use **Partitioned** when `SameSite=None`. |
-| **Migrations**        | Run `python -m alembic upgrade head` from CI/CD or a one-off job using the same production `DATABASE_URL` before serving a fresh database.                                                                                                                                                                                                                                     |
+| **Migrations**        | Run `python -m alembic upgrade head` from CI/CD or a one-off job using the same production `DATABASE_URL` before serving a fresh database.                                                                                                                                                                                                                 |
 
 For production, **`FRONTEND_ORIGINS`** must include every real SPA host that will call the API with credentials. If `NODE_ENV=production` and `FRONTEND_ORIGINS` is empty, startup fails intentionally.
 
@@ -138,11 +136,11 @@ Route dependencies restrict endpoints by role (**ADMIN**, **SUPERVISOR**, **INST
 
 ## Error Handling and Validation
 
-| Mechanism                       | Brief description                                                                                                                                                                                                                                      |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Pydantic schemas**            | Request bodies and query/path parameters are validated at the API boundary. Validation errors are flattened into `errors[]` with `property` and `messages`.                                                                                             |
-| **Global exception handlers**   | `app/core/errors.py` catches validation errors, invalid JSON, stable business exceptions, `HTTPException`, and DB unique violations where applicable.                                                                                                    |
-| **`AppException` + `ErrorCode`**| Stable `code` + `message` contract in the error JSON, matching the Nest API codes such as `AUTH_INVALID_CREDENTIALS`, `USR_EMAIL_TAKEN`, `CUS_COORDS_MISSING`, and `ORD_NOT_FOUND`.                                                                    |
+| Mechanism                        | Brief description                                                                                                                                                                   |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pydantic schemas**             | Request bodies and query/path parameters are validated at the API boundary. Validation errors are flattened into `errors[]` with `property` and `messages`.                         |
+| **Global exception handlers**    | `app/core/errors.py` catches validation errors, invalid JSON, stable business exceptions, `HTTPException`, and DB unique violations where applicable.                               |
+| **`AppException` + `ErrorCode`** | Stable `code` + `message` contract in the error JSON, matching the Nest API codes such as `AUTH_INVALID_CREDENTIALS`, `USR_EMAIL_TAKEN`, `CUS_COORDS_MISSING`, and `ORD_NOT_FOUND`. |
 
 **Successful response example (envelope wrapper):**
 
@@ -250,12 +248,12 @@ python -m pytest
 
 Tests use FastAPI **`TestClient`**, dependency overrides, and an isolated in-memory SQLite database. Coverage mirrors the Nest e2e tests:
 
-| Test file                 | Main coverage                                                                 |
-| ------------------------- | ----------------------------------------------------------------------------- |
-| `tests/test_app.py`       | `GET /` health envelope                                                       |
-| `tests/test_auth.py`      | signup, login, `/auth/me`, refresh, logout                                    |
-| `tests/test_customers.py` | `GET /customers` (401 without session, list with JWT, bounded `take`)         |
-| `tests/test_orders.py`    | `GET/POST /orders` (roles, creation with georeferenced customer, 404 lookup)  |
+| Test file                 | Main coverage                                                                |
+| ------------------------- | ---------------------------------------------------------------------------- |
+| `tests/test_app.py`       | `GET /` health envelope                                                      |
+| `tests/test_auth.py`      | signup, login, `/auth/me`, refresh, logout                                   |
+| `tests/test_customers.py` | `GET /customers` (401 without session, list with JWT, bounded `take`)        |
+| `tests/test_orders.py`    | `GET/POST /orders` (roles, creation with georeferenced customer, 404 lookup) |
 
 ---
 
